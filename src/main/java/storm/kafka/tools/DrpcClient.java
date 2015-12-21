@@ -7,7 +7,7 @@ import org.apache.thrift7.TException;
 
 public class DrpcClient {
     public static void main(String[] args) throws TException, DRPCExecutionException {
-        DRPCClient client = new DRPCClient(args[0], Integer.parseInt(args[1]));
+        DRPCClient client = new DRPCClient(null,"10.207.0.219", 3772);
         while (true) {
             System.out.println("Word count: " + client.execute("words", "cow"));
             Utils.sleep(1000);

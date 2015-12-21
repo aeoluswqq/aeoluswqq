@@ -9,7 +9,11 @@ import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.topology.base.BaseBasicBolt;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+import storm.kafka.bolt.WordCounter;
+import storm.kafka.bolt.WordNormalizer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +25,14 @@ public class KafkaSpoutTestTopology {
     public static class PrinterBolt extends BaseBasicBolt {
         @Override
         public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        	
         }
 
         @Override
         public void execute(Tuple tuple, BasicOutputCollector collector) {
-            LOG.info(tuple.toString());
+        	String sentence = tuple.getString(0);  
+//            LOG.info(tuple.toString());
+        	System.err.println(sentence);
         }
 
     }
@@ -37,17 +44,21 @@ public class KafkaSpoutTestTopology {
     }
 
     public StormTopology buildTopology() {
-        SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts, "storm-sentence", "", "storm");
+        SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts, "test", "", "storm");
         kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("words", new KafkaSpout(kafkaConfig), 10);
-        builder.setBolt("print", new PrinterBolt()).shuffleGrouping("words");
+//        builder.setBolt("print", new PrinterBolt()).shuffleGrouping("words");
+        builder.setBolt("word-normalizer", new WordNormalizer()).shuffleGrouping("words");
+//        builder.setBolt("print", new PrinterBolt()).shuffleGrouping("word-normalizer");
+        builder.setBolt("word-counter", new WordCounter(),2).fieldsGrouping("word-normalizer", new Fields("word"));
         return builder.createTopology();
     }
 
     public static void main(String[] args) throws Exception {
 
-        String kafkaZk = args[0];
+//        String kafkaZk = args[0];
+    	String kafkaZk = "10.207.0.201:2181";
         KafkaSpoutTestTopology kafkaSpoutTestTopology = new KafkaSpoutTestTopology(kafkaZk);
         Config config = new Config();
         config.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 2000);

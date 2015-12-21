@@ -36,7 +36,7 @@ public class SentenceAggregationTopology {
     }
 
     public StormTopology buildTopology(LocalDRPC drpc) {
-        TridentKafkaConfig kafkaConfig = new TridentKafkaConfig(brokerHosts, "storm-sentence", "storm");
+        TridentKafkaConfig kafkaConfig = new TridentKafkaConfig(brokerHosts, "test", "storm");
         kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         TransactionalTridentKafkaSpout kafkaSpout = new TransactionalTridentKafkaSpout(kafkaConfig);
         TridentTopology topology = new TridentTopology();
@@ -59,7 +59,8 @@ public class SentenceAggregationTopology {
 
     public static void main(String[] args) throws Exception {
 
-        String kafkaZk = args[0];
+//        String kafkaZk = args[0];
+    	String kafkaZk = "10.207.0.201:2181";
         SentenceAggregationTopology sentenceAggregationTopology = new SentenceAggregationTopology(kafkaZk);
         Config config = new Config();
         config.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 2000);
